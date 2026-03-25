@@ -17,6 +17,7 @@ import { computed, onMounted } from 'vue'
 import Timeline from '../components/Timeline.vue'
 import { useTimeline, type TimelineNode } from '../composables/useTimeline'
 import { usePeople, type Person } from '../composables/usePeople'
+import { useAuth } from '../composables/useAuth'
 import { parseISO, compareAsc, format, isValid } from 'date-fns'
 import type { TimeRange } from '../composables/usePeople'
 
@@ -40,6 +41,7 @@ const formatRangeDate = (range: TimeRange): string => {
 
 const { loading: timelineLoading, fetchNodes, sortedNodes } = useTimeline()
 const { people, fetchPeople } = usePeople()
+const { canViewPeople } = useAuth()
 
 const loading = computed(() => timelineLoading.value)
 
@@ -75,9 +77,13 @@ const convertTimeRangesToNodes = (peopleList: Person[]): TimelineNode[] => {
 // 合并时间轴节点和人物时间段，并按日期排序
 const allNodes = computed(() => {
   const timelineNodes = sortedNodes.value || []
-  const personRangeNodes = convertTimeRangesToNodes(people.value)
-
-  const combined = [...timelineNodes, ...personRangeNodes]
+  
+  // 只有管理员才能看到人物节点
+  let combined = [...timelineNodes]
+  if (canViewPeople.value) {
+    const personRangeNodes = convertTimeRangesToNodes(people.value)
+    combined = [...combined, ...personRangeNodes]
+  }
 
   // 按日期排序
   return combined.sort((a, b) => {

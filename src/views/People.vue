@@ -2,7 +2,41 @@
   <div class="people-page">
     <div class="page-header">
       <h1>人物管理</h1>
-      <button class="add-btn" @click="showForm = true">+ 添加人物</button>
+      <div class="header-actions">
+        <button 
+          v-if="isLocalDev" 
+          class="save-btn" 
+          :class="{ 'saving': saving }"
+          @click="saveToFile"
+          :disabled="saving"
+        >
+          <span v-if="saving">💾 保存中...</span>
+          <span v-else>💾 保存到文件</span>
+        </button>
+        <button 
+          v-if="isLocalDev" 
+          class="backup-btn"
+          @click="createBackup"
+        >
+          📦 备份
+        </button>
+        <button class="add-btn" @click="showForm = true">+ 添加人物</button>
+      </div>
+    </div>
+    
+    <!-- 保存状态消息 -->
+    <div v-if="saveMessage" class="save-message" :class="{ 'success': saveMessage.includes('✅'), 'error': saveMessage.includes('❌') }">
+      {{ saveMessage }}
+    </div>
+    
+    <!-- 本地开发提示 -->
+    <div v-if="isLocalDev" class="dev-notice">
+      <span class="dot"></span>
+      本地开发模式 - 修改后点击"保存到文件"可将数据写入 public/data/people.json
+    </div>
+    <div v-else class="prod-notice">
+      <span class="dot gray"></span>
+      生产模式 - 数据仅保存在内存中，刷新页面后恢复
     </div>
     
     <div v-if="loading" class="loading">加载中...</div>
@@ -62,11 +96,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, reactive, computed } from 'vue'
 import PersonCard from '../components/PersonCard.vue'
 import { usePeople, type Person } from '../composables/usePeople'
 
-const { people, peopleWithAge, loading, fetchPeople, addPerson, updatePerson, deletePerson } = usePeople()
+const { 
+  people, 
+  peopleWithAge, 
+  loading, 
+  saving, 
+  saveMessage, 
+  fetchPeople, 
+  savePeople,
+  backupData,
+  addPerson, 
+  updatePerson, 
+  deletePerson 
+} = usePeople()
 
 const showForm = ref(false)
 const editingId = ref<string | null>(null)
@@ -76,6 +122,10 @@ const form = reactive({
   meetDate: '',
   avatar: '',
   memo: ''
+})
+
+const isLocalDev = computed(() => {
+  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
 })
 
 onMounted(() => {
@@ -109,11 +159,40 @@ const savePerson = async () => {
     await addPerson({ ...form })
   }
   closeForm()
+  
+  // 本地开发模式下询问是否保存到文件
+  if (isLocalDev.value && confirm('是否立即保存到文件？')) {
+    await saveToFile()
+  }
 }
 
 const deletePersonById = async (id: string) => {
   if (confirm('确定要删除这个人物吗？')) {
     await deletePerson(id)
+    
+    // 本地开发模式下询问是否保存到文件
+    if (isLocalDev.value && confirm('是否立即保存到文件？')) {
+      await saveToFile()
+    }
+  }
+}
+
+const saveToFile = async () => {
+  if (!isLocalDev.value) {
+    alert('保存功能仅在本地开发环境可用')
+    return
+  }
+  
+  const success = await savePeople()
+  if (success) {
+    console.log('数据已保存到 public/data/people.json')
+  }
+}
+
+const createBackup = async () => {
+  const success = await backupData()
+  if (success) {
+    console.log('备份已创建')
   }
 }
 </script>
@@ -127,12 +206,18 @@ const deletePersonById = async (id: string) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   color: white;
 }
 
 .page-header h1 {
   font-size: 2rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .add-btn {
@@ -148,6 +233,111 @@ const deletePersonById = async (id: string) => {
 
 .add-btn:hover {
   transform: translateY(-2px);
+}
+
+.save-btn {
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.save-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+}
+
+.save-btn.saving {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.backup-btn {
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.backup-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.save-message {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
+}
+
+.save-message.success {
+  background: rgba(74, 222, 128, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.save-message.error {
+  background: rgba(248, 113, 113, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dev-notice,
+.prod-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.dev-notice {
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.prod-notice {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9ca3af;
+  border: 1px solid rgba(156, 163, 175, 0.3);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  animation: pulse 2s infinite;
+}
+
+.dot.gray {
+  background: #9ca3af;
+  animation: none;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .people-grid {

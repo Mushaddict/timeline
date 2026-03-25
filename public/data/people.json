@@ -2,13 +2,15 @@
   "people": [
     {
       "id": "p001",
-      "name": "示例人物",
+      "name": "肖仲颜",
       "birthday": "1995-06-15",
       "zodiac": "双子座",
       "avatar": "",
       "meetDate": "2020-03-10",
       "memo": "这是一个示例人物，你可以在人物页面添加更多",
-      "timelineIds": ["t001"]
+      "timelineIds": [
+        "t001"
+      ]
     }
   ]
 }

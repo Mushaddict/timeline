@@ -24,11 +24,17 @@
 ### 本地开发
 
 ```bash
-# 安装依赖
+# 安装依赖（需要 express, cors, concurrently）
 npm install
 
-# 启动开发服务器
+# 方式1: 仅启动前端（数据不保存到文件）
 npm run dev
+
+# 方式2: 同时启动前端 + 后端 API（推荐，支持保存到文件）
+npm run dev:full
+
+# 单独启动后端 API
+npm run server
 
 # 构建生产版本
 npm run build
@@ -36,6 +42,18 @@ npm run build
 # 预览生产版本
 npm run preview
 ```
+
+### 本地编辑并保存到文件
+
+在本地开发模式下 (`npm run dev:full`)，你可以在网页上直接编辑人物信息并保存到 JSON 文件：
+
+1. 启动完整开发环境：`npm run dev:full`
+2. 打开 http://localhost:5173/timeline/
+3. 进入"人物"页面，点击"添加人物"或编辑现有人物
+4. 点击"💾 保存到文件"按钮，数据将写入 `public/data/people.json`
+5. 每次保存前会自动创建备份到 `backups/` 目录
+
+**注意**：生产环境（GitHub Pages）下无法保存到文件，数据仅保存在浏览器内存中。
 
 ### 部署到 GitHub Pages
 

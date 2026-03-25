@@ -1,0 +1,33 @@
+{
+  "nodes": [
+    {
+      "id": "t001",
+      "date": "2024-03-25",
+      "type": "point",
+      "title": "欢迎使用 Timeline！",
+      "frames": [
+        {
+          "id": "f001",
+          "personId": "p001",
+          "content": "这是一个示例时间节点。你可以编辑 public/data/timeline.json 文件来添加自己的时间节点。每个节点可以包含多个框架，用于记录不同的人对该事件的描述。",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "t002",
+      "date": "2024-03-20",
+      "endDate": "2024-03-25",
+      "type": "range",
+      "title": "示例时间段事件",
+      "frames": [
+        {
+          "id": "f002",
+          "personId": "p001",
+          "content": "这是一个时间段的示例，展示了持续多天的事件。时间段用波浪线标记。",
+          "images": []
+        }
+      ]
+    }
+  ]
+}

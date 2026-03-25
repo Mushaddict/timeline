@@ -3,14 +3,23 @@
     {
       "id": "p001",
       "name": "肖仲颜",
-      "birthday": "1995-06-15",
-      "zodiac": "双子座",
+      "birthday": "2001-07-25",
+      "zodiac": "狮子座",
       "avatar": "",
-      "meetDate": "2020-03-10",
-      "memo": "这是一个示例人物，你可以在人物页面添加更多",
+      "meetDate": "2026-01-08",
+      "memo": "seven介绍",
       "timelineIds": [
         "t001"
       ]
+    },
+    {
+      "name": "韩萌",
+      "birthday": "1999-12-20",
+      "meetDate": "2026-01-17",
+      "avatar": "",
+      "memo": "北医三院整形科专硕转博",
+      "id": "p1774443244672",
+      "zodiac": "射手座"
     }
   ]
 }

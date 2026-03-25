@@ -2,6 +2,14 @@ import { ref, computed } from 'vue'
 import { parseISO, differenceInYears } from 'date-fns'
 import { useZodiac } from './useZodiac'
 
+export interface TimeRange {
+  id: string
+  title: string
+  startDate: string
+  endDate: string | 'present'
+  description?: string
+}
+
 export interface Person {
   id: string
   name: string
@@ -11,6 +19,7 @@ export interface Person {
   meetDate?: string
   memo?: string
   timelineIds?: string[]
+  timeRanges?: TimeRange[]
 }
 
 const { getZodiac } = useZodiac()
@@ -25,14 +34,14 @@ export function usePeople() {
   const loading = ref(false)
   const saving = ref(false)
   const saveMessage = ref('')
-  
+
   const peopleWithAge = computed(() => {
     return people.value.map(person => {
-      const age = person.birthday 
+      const age = person.birthday
         ? differenceInYears(new Date(), parseISO(person.birthday))
         : null
       const zodiacInfo = getZodiac(person.birthday)
-      
+
       return {
         ...person,
         age,
@@ -40,7 +49,7 @@ export function usePeople() {
       }
     })
   })
-  
+
   const fetchPeople = async () => {
     loading.value = true
     try {
@@ -63,33 +72,33 @@ export function usePeople() {
       loading.value = false
     }
   }
-  
+
   const savePeople = async () => {
     if (!isLocalDev()) {
       saveMessage.value = '保存功能仅在本地开发环境可用'
       return false
     }
-    
+
     saving.value = true
     saveMessage.value = ''
-    
+
     try {
       const response = await fetch('http://localhost:3001/api/people', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ people: people.value })
       })
-      
+
     if (!response.ok) throw new Error('Save failed')
-    
+
     await response.json()
     saveMessage.value = '✅ 已保存到文件'
-      
+
       // 3秒后清除消息
       setTimeout(() => {
         saveMessage.value = ''
       }, 3000)
-      
+
       return true
     } catch (error) {
       console.error('Failed to save people:', error)
@@ -99,38 +108,38 @@ export function usePeople() {
       saving.value = false
     }
   }
-  
+
   const backupData = async () => {
     if (!isLocalDev()) return false
-    
+
     try {
       const response = await fetch('http://localhost:3001/api/backup', {
         method: 'POST'
       })
-      
+
       if (!response.ok) throw new Error('Backup failed')
-      
+
       saveMessage.value = '💾 已创建备份'
       setTimeout(() => {
         saveMessage.value = ''
       }, 3000)
-      
+
       return true
     } catch (error) {
       console.error('Failed to backup:', error)
       return false
     }
   }
-  
+
   const getPersonById = (id: string) => {
     return people.value.find(p => p.id === id)
   }
-  
+
   const getPersonName = (id: string) => {
     const person = getPersonById(id)
     return person?.name || '未知'
   }
-  
+
   const addPerson = async (person: Omit<Person, 'id'>) => {
     const newPerson: Person = {
       ...person,
@@ -140,26 +149,26 @@ export function usePeople() {
     people.value.push(newPerson)
     return newPerson
   }
-  
+
   const updatePerson = async (id: string, updates: Partial<Person>) => {
     const index = people.value.findIndex(p => p.id === id)
     if (index === -1) return null
-    
+
     if (updates.birthday) {
       updates.zodiac = getZodiac(updates.birthday)?.name
     }
-    
+
     people.value[index] = { ...people.value[index], ...updates }
     return people.value[index]
   }
-  
+
   const deletePerson = async (id: string) => {
     const index = people.value.findIndex(p => p.id === id)
     if (index === -1) return false
     people.value.splice(index, 1)
     return true
   }
-  
+
   return {
     people,
     peopleWithAge,

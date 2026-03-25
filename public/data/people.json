@@ -10,6 +10,15 @@
       "memo": "seven介绍",
       "timelineIds": [
         "t001"
+      ],
+      "timeRanges": [
+        {
+          "id": "tr17744445509503crg6qot9",
+          "title": "女朋友",
+          "startDate": "2026-02-14",
+          "endDate": "present",
+          "description": ""
+        }
       ]
     },
     {

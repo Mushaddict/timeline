@@ -6,16 +6,20 @@
   "scripts": {
     "dev": "vite",
     "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
+    "dev:mysql": "concurrently \"npm run server:mysql\" \"npm run dev\"",
     "server": "node server.js",
+    "server:mysql": "node server-mysql.js",
     "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server-mysql.js"
   },
   "dependencies": {
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
     "pinia": "^2.1.7",
     "gsap": "^3.12.5",
-    "date-fns": "^3.6.0"
+    "date-fns": "^3.6.0",
+    "mysql2": "^3.9.7"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
